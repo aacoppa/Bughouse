@@ -2,23 +2,28 @@ BUGHOUSE - THE FOUR PLAYER CHESS GAME
 
 What is Bughouse?
 
+A four player variant on chess with two teams of two players. The goal
+in this game however, is to take the other players king. There is no 
+direct checkmating, although a checkmate is the same thing as winning next turn.
+
 http://en.wikipedia.org/wiki/Bughouse_chess
 
 Why was this made?
 
-This is a java project initially created for exploration into multithreading and
-networking in java.
+This is a java project initially started for my AP Computer Science final project. I saw it as an avenue to explore networking, and to work with a game that I love. I continued the project beyond the expectations of the course. I wrote my own Server and Client code (SimpleServer.java and SimpleClient.java) as an exploration into multithreading networking in java. 
 
 What is the program?
 
-This program allows for a number of clients to connect to a server, with a basic
+This program allows for any number of clients to connect to a server, with a basic
 username, password, and rating system. Then every four players that look for a 
 game are paired together and will start a new game.
 
 What is it made in?
 
 The client is written in Processing, a offshoot of java with simple graphics.
-The server is written in pure java, because Processing requires an X windows server,
-and the server I have access to does not have an X windows server. 
+The server and networking code is written in pure java, because Processing requires X,
+and the server I have access to does not have X. 
 
+How can I use this program?
 
+Currently Processing is required to run this, because the graphics are all written in Processing, but eventually it will either be ported to pure Java, or more hopefully, to the web.

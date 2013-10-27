@@ -1,4 +1,7 @@
 import processing.net.*; 
+import java.util.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 Game game;
 int globalX = 0;
 int globalY = 0;
@@ -65,9 +68,9 @@ void keyPressed() {
   } else if (!passSubmitted) {
     passEntry();
   }
-  if (joinTeam) {
-    mateEntry();
-  }
+//    if (joinTeam) {
+//      mateEntry();
+//    }
 }
 void nameEntry() {
   if (key == BACKSPACE) { //Backspace removes last charecter
@@ -84,7 +87,7 @@ void nameEntry() {
     //for denotation of ending of names, aka ',' and ':'
   }
 }
-void mateEntry() {
+/*void mateEntry() {
   if (key == BACKSPACE) { //Backspace removes last charecter
     if (potentialMate.length() > 0) {
       potentialMate = potentialMate.substring(0, potentialMate.length() -1);
@@ -108,7 +111,7 @@ void mateRequest() {
     rect(sX, sY, w, h);
     text(potentialMate + " wants to join your team", sX + w / 2, sY + h / 2 );
   }
-}
+}*/
 void passEntry() {
   if (key == BACKSPACE) { //Backspace removes last charecter
     if (password.length() > 0) {
@@ -132,7 +135,7 @@ void setup() {
   size(1100, 700);
   nameClient = new SimpleClient(ip, namePort); //These two static servers are the same for all clients
   //System.out.println("socketed");
-  menuClient = new SimpleClient(ip, namePort - 1);
+  //menuClient = new SimpleClient(ip, namePort - 1);
 }
 void draw() {
   // We go down this list of functions in order
@@ -144,13 +147,16 @@ void draw() {
       createAccount();
     }
   } else if (inMenu) {
-    menuClientRun();
-    if (joinTeam) {
-      joinTeamDisplay();
-    } else 
-      menuDisplay(); //Menu is here
+   // menuClientRun();
+   //  if (joinTeam) {
+   //    joinTeamDisplay();
+   // } else 
+      menuDisplay(); //Menu is here */
   } else if (!connected) {
-    connectDisplay(); //In here is both getting our port, and then connecting to that server
+    connectDisplay(); //Display it
+    if(!serverFound) { //Find out server then connect to it
+      findServer();
+    } else connect();
   } else if (pregame) {
     pregameDisplay(); //Waiting for four players and also confirming our presence
   } else {
@@ -160,57 +166,55 @@ void draw() {
     //confirmConnect();
   }
 }
-void menuClientRun() {
-  if (menuClient.available() > 0) {
-    String input = menuClient.readString();
-    if (input.contains("potentialMate")) {
-      String [] p = split(input, ":");
-      potentialMate = p[1];
-    }
-  }
-}
-void joinTeamDisplay() {
-  if (mateSubmitted) {
-    if (pause < 0) {
-      String out = "tm:" + potentialMate + ":" + name;
-      menuClient.write(out);
-      pause = 5;
-    } else pause--;
-    if (menuClient.available() > 0) {
-      String response = menuClient.readString();
-      String [] pieces = split(response, ":");
-      if (pieces[0].equals("tm")) {
-        if (pieces[1].equals(name)) {
-          if (pieces[2].equals("yes")) {
-            teamMate = potentialMate;
-            mateSubmitted = false;
-            inTeam = true;
-            joinTeam = false;
-          }
-        }
-      }
-    }
-  }
+//  void menuClientRun() {
+//    if (menuClient.available() > 0) {
+//      String input = menuClient.readString();
+//      if (input.contains("potentialMate")) {
+//        String [] p = split(input, ":");
+//        potentialMate = p[1];
+//      }
+//    }
+//  }
+//  void joinTeamDisplay() {
+//    if (mateSubmitted) {
+//      if (pause < 0) {
+//        String out = "tm:" + potentialMate + ":" + name;
+//        menuClient.write(out);
+//        pause = 5;
+//      } else pause--;
+//      if (menuClient.available() > 0) {
+//        String response = menuClient.readString();
+//        String [] pieces = split(response, ":");
+//        if (pieces[0].equals("tm")) {
+//          if (pieces[1].equals(name)) {
+//            if (pieces[2].equals("yes")) {
+//              teamMate = potentialMate;
+//              mateSubmitted = false;
+//              inTeam = true;
+//              joinTeam = false;
+//            }
+//          }
+//        }
+//      }
+//    }
   //All display code here
-  background(222, 170, 121);
-  textAlign(CENTER);
-  textSize(72);
-  fill(186, 222, 121);
-  text("Join Team", width / 2, height / 2 - 160);
-  textSize(36);
-  //text(
-  text("Enter partner name", width / 2, height / 2 - 80);
-  //Here is our back button
-  text(potentialMate, width / 2, height / 2 - 40);
-  if (mouseX > width / 2 - 50 && mouseX < width / 2 + 50 &&
-    mouseY > height / 2 + 40 && mouseY < height / 2 + 100) {
-    fill(186, 252, 171);
-    if (mousePressed) {
-      joinTeam = false;
-    }
-  }
-  text("Back", width / 2, height / 2 + 70);
-}
+//    background(222, 170, 121);
+//    textAlign(CENTER);
+//    textSize(72);
+//    fill(186, 222, 121);
+//    text("Join Team", width / 2, height / 2 - 160);
+//    textSize(36);
+//    text("Enter partner name", width / 2, height / 2 - 80);
+//    text(potentialMate, width / 2, height / 2 - 40);
+//    if (mouseX > width / 2 - 50 && mouseX < width / 2 + 50 &&
+//      mouseY > height / 2 + 40 && mouseY < height / 2 + 100) {
+//      fill(186, 252, 171);
+//      if (mousePressed) {
+//        joinTeam = false;
+//      }
+//    }
+//    text("Back", width / 2, height / 2 + 70);
+//  }
 void connect() {
   //This function gets us our playerNumber and tells the server we are playing on them
   if (pause < 0) {
@@ -231,6 +235,7 @@ void connect() {
     }
     if (pNumber == 0) return; //This is a safeguard
     //Create our game, and then update pregame so that we wait for four players
+    //log("Player number on server: " + pNumber);
     game = new Game(player, pNumber);
     connected = true;
     pregame = true;
@@ -265,6 +270,7 @@ void findServer() {
     midPort = num + 1;
     playPort = num + 2;
     //Now we initialize all of the next clients
+    //log("Play port is: " + playPort);
     clide = new SimpleClient(ip, connectionPort);
     midway = new SimpleClient(ip, midPort);
     player = new SimpleClient(ip, playPort);
@@ -310,19 +316,19 @@ void menuDisplay() {
   }
   text("Switch users", width / 2, height / 2 + 80);
   fill(186, 222, 121);
-  if (inTeam == false) {
-    //
-    if (mouseX > width / 2 - 100 && mouseX < width / 2 + 100 
-      && mouseY > height / 2 + 110 && mouseY < height / 2 + 170) {
-      fill(186, 252, 171); 
-      if (mousePressed) {
-        joinTeam = true;
-      }
-    }
-    text("Join team", width / 2, height / 2 + 140);
-  } else {
-    text("Leave team", width / 2, height / 2 + 140);
-  }
+//    if (inTeam == false) {
+  
+//      if (mouseX > width / 2 - 100 && mouseX < width / 2 + 100 
+//        && mouseY > height / 2 + 110 && mouseY < height / 2 + 170) {
+//        fill(186, 252, 171); 
+//        if (mousePressed) {
+//          joinTeam = true;
+//        }
+//      }
+//      text("Join team", width / 2, height / 2 + 140);
+//    } else {
+//      text("Leave team", width / 2, height / 2 + 140);
+//    }
   textSize(28);
   fill(255);
   text("Welcome " + name, width * 7 / 8, height * 7 / 8);
@@ -402,8 +408,7 @@ void namePicker() {
   } else if (passSubmitted) {
     //This pause is so we don't constantly write every frame
     if (pause < 0) {
-      nameClient.write(name + ": " + password + " : " + 
-        oldPerson);
+      nameClient.write(name + ":" + password + ":oldPerson");
       pause = startPause;
     } else pause--;
 
@@ -593,6 +598,7 @@ void pregameDisplay() {
   if (midway.available() > 0) {
     String data = midway.readString();
     println(pNumber); 
+    //log("Data from midway with names and ratings:\n" + data);
     game.setPlayerNames(data);
     midway.write(15 + ""); //End code, signals we got the data and are ready to play
     pregame = false; //Now we are playing!
@@ -619,4 +625,15 @@ void connectDisplay() {
   //If we have not yet found our game server, we will find it and set our ports for 
   //clide, midway, and player
   //Otherwise we will connect and get our playerNumber
+}
+void log(String message) {
+  PrintWriter output = createWriter("log.txt");
+  output.println(getTime());
+  output.println(message + "\n");
+  output.flush();
+}
+public static String getTime() {
+DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+Date date = new Date();
+return (dateFormat.format(date));
 }

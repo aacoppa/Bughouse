@@ -26,7 +26,7 @@ public void setup() {
   //Create our two global servers for all clients
   connectionServer = new SimpleServer(mainPort);
   nameServer = new SimpleServer(namePort);
-  menuServer = new SimpleServer(startPort - 1);
+  //menuServer = new SimpleServer(startPort - 1);
   int port = startPort;
   //Then make an array of servers, initilizing them with different ports
   //Interesting note: Servers must be created in this class due to needed
@@ -50,7 +50,7 @@ public void draw() {
   listenForNames(); //Listen for a name input, and send out the corresponding rating
   findNewServer(); //Listen for name and give them the first partially empty server
   listenForConnection(); //Update the first partially empty server marker
-  menuServerRun();
+  //menuServerRun();
   //Then run each GameServer
   for (int i = 0; i < gs.length; i++) {
     try {
@@ -61,7 +61,7 @@ public void draw() {
     }
   }
 }
-public void menuServerRun() {
+/*public void menuServerRun() {
 	if(menuServer.available() > 0) {
 		String input = menuServer.readString();
 		String who = getPlayerByIp(menuServer.getIp());
@@ -78,7 +78,7 @@ public void attemptToConnect(String asker, String receiver) {
 	if(isOnline(receiving)) {
 
 	}
-}
+}*/
 public static String getTime() {
 DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 Date date = new Date();
