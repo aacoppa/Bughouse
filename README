@@ -10,7 +10,7 @@ http://en.wikipedia.org/wiki/Bughouse_chess
 
 Why was this made?
 
-This is a java project initially started for my AP Computer Science final project. I saw it as an avenue to explore networking, and to work with a game that I love. I continued the project beyond the expectations of the course. I wrote my own Server and Client code (SimpleServer.java and SimpleClient.java) as an exploration into multithreading networking in java. 
+This is a Java project initially started for my AP Computer Science final project. I saw it as an avenue to explore networking, and to work with a game that I love. I continued the project beyond the expectations of the course. I wrote my own Server and Client code (SimpleServer.java and SimpleClient.java) as an exploration into multithreading networking in java. 
 
 What is the program?
 
@@ -21,9 +21,18 @@ game are paired together and will start a new game.
 What is it made in?
 
 The client is written in Processing, a offshoot of java with simple graphics.
-The server and networking code is written in pure java, because Processing requires X,
+The server and networking code is written in pure java, because Processing requires X windows,
 and the server I have access to does not have X. 
 
 How can I use this program?
 
+https://www.processing.org/download/
+
 Currently Processing is required to run this, because the graphics are all written in Processing, but eventually it will either be ported to pure Java, or more hopefully, to the web.
+Clone this project into any directory. Then run
+
+mv Client\ Side/BugHouse_Client ~/Documents/Processing
+
+Open the folder in Processing and run the sketch. It is likely that you will not get paired into a game because currently it requires four players. If the server is not running it will exit with a "Didn't socket message"
+
+If you would like to test it out and either need someone to play with or find the server isn't running simply email me at aacoppa@gmail.com, I'd be happy to accomodate you.
