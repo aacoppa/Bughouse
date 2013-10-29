@@ -1,3 +1,6 @@
+//A homemade Server class!
+//To do... fix the synchronization of latest ip
+//What if two people write at the same exact time?
 	import java.net.*;
 	import java.io.*;
 	import java.util.*;
@@ -7,12 +10,13 @@
 		Data data;
 		public SimpleServer(int p) {
 			port = p;
-			data = new Data();
-			//newData = false;
-			clients = Collections.synchronizedList(new ArrayList<Client>());
+			data = new Data(); //Data used because we can't get things by reference
+                                           //in java, therefore we need an object...
+			clients = Collections.synchronizedList(new ArrayList<Client>()); //keep it synchronized because we have listener and readers accessing...
 			Listener l = new Listener(clients, port, data);
 			l.start();
 		}
+                //Called to check if there's no data
 		int available() {
 			if(data.getNew()) return 100; //For now just value greater than 0
 			else return 0;
@@ -20,7 +24,8 @@
 		public int numberClients() {
 			return clients.size();
 		}
-		
+		//Sending new lines through ip/tcp got weird results so we just
+                //auto-replace them with pipes
 		String reNewline(String str) {
   		      for(int i = 0; i < str.length(); i++) {
   			      if(str.charAt(i) == '|') {
@@ -39,23 +44,28 @@
 			}
 		    return str;
 		  }
+                //Get the latest data written
 		String readString() {
 			data.updateNew(false);
 			return reNewline(data.getString());
 		}
+                //Write to each individual client
 		void write(String str) {
 			for(int i = 0; i < clients.size(); i++) {
 				PrintWriter out;
 				try {
 					out = new PrintWriter(clients.get(i).getSocket().getOutputStream(), true);
+                                        //Create the output stream...
 				} catch(Exception e) {
 					continue;
 				}
 				//System.out.println("writiing");
+                                //De newline the string before we send
 				out.println(deNewline(str));
 				out.flush();
 			}
 		}
+                //Check if a client is connected...
 		public boolean isConnectedByIP(String ip) {
 			if(ip == null) return false;
 			for(int i = 0; i < clients.size(); i++) {
@@ -64,15 +74,14 @@
 			}
 			return false;
 		}
+                //To find out who the latest data is from, might need
+                //to rethink this because of threading issues
 		public String getLatestIP() {
 			return data.getDataIP();
 		}
+                //Testing...
 		public static void main(String [] args) {
 			SimpleServer s = new SimpleServer(60420);
-	//		
-			//Thread shutDownThread;
-			//shutDownThread
-			//Runtime.addShutdownHook(shutDownThread);
 			while(true) {
 			try {
                 	      Thread.sleep(40);
@@ -90,9 +99,10 @@
 		return data.getDataIP();
 	}
 }
+        //Client class... stores each client that's connected
 	class Client {
-		Reader r;
-		Socket sock;
+		Reader r; //See below for Reader definition
+		Socket sock; 
 		public String ip;
 		public String name;
 		public boolean connected;
@@ -124,10 +134,14 @@
 			return ip;
 		}
 		boolean connected() {
-			return !personalData.getNew();
+			return !personalData.getNew(); //Does not represent new data!!!! 
+                        //represents connected state
 		}
 	}
+        //Reader is the class that reads data in from each Client
+        //for each individual client
 	class Reader extends Thread {
+                
 		Data myData;			
 		Socket sock;
 		Data clientData;
@@ -150,43 +164,49 @@
 		while(true) {
 			timeOut--;
 			if(timeOut <= 0) {
-				//System.out.println("Bye client");
+                                //This means the connection timed out...
+                                //So we disconnect the client, which is done via below...
 				clientData.updateNew(true); //Client data does NOT represent new data, represents clients
-							    //connected state
 				break;
 			}
 			updateData();
 		}
 	}
 	private void updateData() {
-		//Why will it not go through there without a println...........
-		//System.out.println("Updating data");
 		BufferedReader in;
 		try {
 			in = new BufferedReader(new InputStreamReader(sock.getInputStream()));
 		} catch(Exception e) {
+                        //On failure we'll eventually timeout...
 			return;
 		}
 		String inLine;
 		try {
 		inLine = in.readLine();
 		} catch(Exception e) {
+                        //Same as above
 			return;
 		}
+                //There's new data...
 		if(inLine != null) {
-			timeOut = startTimeOut;
+			timeOut = startTimeOut; //reset timeOut
 			if(inLine.equals(ip)) {
-				return;
+				return; //Client sends out ip every once and a while
+                                        //to confirm its connection
 			}
+                        //Only one thread can access myData in this block...
+                        //Bless java for not making me do true locking, although I
+                        //would love to implement an MCS lock 
 			synchronized(myData) {
-			myData.updateNew(true);
-			myData.updateString(inLine);
-			myData.setDataIP(ip);
+			myData.updateNew(true); //We have new data
+			myData.updateString(inLine); //Write the new data
+			myData.setDataIP(ip); //Set the newest data's ip to ip
 			}
 			return;
 		}
 	}
 }
+//Listener for new clients!
 class Listener extends Thread {
 	ServerSocket sock;
 	List<Client> clients;
@@ -206,8 +226,9 @@ class Listener extends Thread {
 	public void run() {
 		while(true) {
 			for(int i = 0; i < clients.size(); i++) {
+                            //Loop through each client and clean up disconnected clients...
 				if(clients.get(i).connected() == false) {
-					clients.get(i).r = null;
+					clients.get(i).r = null; //clients is synchronized by Java
 					clients.remove(i);
 					i--;
 				}
@@ -221,16 +242,18 @@ class Listener extends Thread {
 		try {
 			cli = sock.accept(); //This blocks!!
 		} catch(Exception e) {
+                    //After a while it fails
 			if(e instanceof IOException) {
 			//System.err.println("Error accepting new clients");
 			//throw new IOException();
 			}
 			return;	
 		}
-		Client c = new Client(cli, data);
+		Client c = new Client(cli, data); //Create a new client if we have a connection
 		clients.add(c);
 	} 
 }
+//This class is used for data storage 
 class Data {
 	public boolean newData;
 	public String str;

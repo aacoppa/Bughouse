@@ -1,0 +1,7 @@
+TODO
+
+We need to fix up SimpleServer to work with receiving data at the same time
+    (Not sure this is broken need some inspection)
+Add storing games as pgn's to Server...
+Add teams!
+**Make this work in web browsers!!!!! From there its truly powerful

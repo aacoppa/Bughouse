@@ -1,5 +1,6 @@
 import java.net.*;
 import java.io.*;
+//Client side of SimpleServer
 public class SimpleClient {
   String ip;
   int port;
@@ -48,10 +49,11 @@ public class SimpleClient {
       return;
     }
   }	
+  //Testing
   public static void main(String [] args) {
    		SimpleClient c = new SimpleClient("192.168.1.149", 60420);
 		while(true) {
-			c.write("Poop"); 
+			c.write("Poppa"); 
 			try {
 			Thread.sleep(10);
 			} catch(Exception e) {
@@ -65,6 +67,7 @@ public class SimpleClient {
 		}	
    	} 
 }
+//Reads in data from Server, only one here...
 class Reader extends Thread {
   Data myData;
   Socket sock;
@@ -82,13 +85,12 @@ class Reader extends Thread {
     }
   }
   private void updateData() {
-    //Why will it not go through there without a println...........
     BufferedReader in;
     try {
       in = new BufferedReader(new InputStreamReader(sock.getInputStream()));
+      //init our instream
     } 
     catch(Exception e) {
-      System.out.println("err");
       return;
     }
     String inLine;
@@ -96,9 +98,11 @@ class Reader extends Thread {
       inLine = in.readLine();
     } 
     catch(Exception e) {
+      //Nothing new
       return;
     }
     if (inLine != null) {
+        //Don't need to worry about timeout hopefully
       	synchronized(myData) {
 		myData.updateNew(true);
 		myData.updateString(inLine);
@@ -107,7 +111,7 @@ class Reader extends Thread {
     }
   }
 }
-
+//Data class to allow for reference updating!
 class Data {
   public boolean newData;
   public String str;

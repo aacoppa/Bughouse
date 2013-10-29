@@ -37,7 +37,7 @@ public void setup() {
     new SimpleServer(port + 2), port);
     port += 3;
   }
-  ServerMonitor monitor = new ServerMonitor(gs);
+  ServerMonitor monitor = new ServerMonitor(gs); //This allows for reseting, etc...
   monitor.start();
   //Load up our player data into the hashmap
   loadPlayers();
@@ -612,9 +612,10 @@ class Player {
   return ip;
  }
 }
+//Allows for talking to Server while running
 class ServerMonitor extends Thread {
 	SimpleServer s;
-	GameServer [] servers;
+	GameServer [] servers; //Take the gameservers so we can see whats happening
 	public ServerMonitor(GameServer [] gs) {
 		s = new SimpleServer(42687);
 		servers = gs;
@@ -622,7 +623,7 @@ class ServerMonitor extends Thread {
 	public void run() {
 		while(true) {
 			if(s.available() > 0) {
-				interpret(s.readString());
+				interpret(s.readString()); //Try to read the sent data...
 			}	
 		}
 	}
@@ -681,11 +682,12 @@ class ServerMonitor extends Thread {
 		s.write(str);
 	}
      }
+        //THE MAIN FUNCTION!!!!
 	public static void main(String [] args) {
-		BugHouse_Server bs = new BugHouse_Server();
-		bs.setup();
+		BugHouse_Server bs = new BugHouse_Server(); //Create our object
+		bs.setup(); //Set it up
 		while(true) {
-			bs.draw();
+			bs.draw(); //And run!
 		}
 	}
 }
